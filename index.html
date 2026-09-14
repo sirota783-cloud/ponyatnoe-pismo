@@ -12,7 +12,7 @@
   --shadow:0 8px 25px rgba(30,41,59,.08)
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text);line-height:1.48}
+body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text);line-height:1.5}
 .wrap{max-width:1000px;margin:auto;padding:20px}
 header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
 h1{margin:0;font-size:clamp(30px,4vw,44px)}
@@ -24,7 +24,7 @@ h1{margin:0;font-size:clamp(30px,4vw,44px)}
 .hero{text-align:center;padding:32px 24px}
 .hero h2{margin:0 0 8px;font-size:30px}
 .hero p{margin:0 auto 22px;font-size:20px;color:var(--muted);max-width:760px}
-.drop{border:3px dashed #9eb6e8;border-radius:18px;padding:30px 18px;background:#fbfdff;transition:.2s}
+.drop{border:3px dashed #9eb6e8;border-radius:18px;padding:30px 18px;background:#fbfdff}
 .drop.drag{background:#eef4ff;border-color:var(--blue)}
 .icon{font-size:50px}
 .big{font-size:21px;font-weight:700;margin:7px 0 14px}
@@ -39,8 +39,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
 input[type=file]{display:none}
 .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}
 .filechip{display:inline-block;background:#f2f4f7;border-radius:12px;padding:10px 14px;margin-top:14px;font-size:17px}
-.preview{margin-top:14px}
-.preview img{max-width:100%;max-height:380px;border-radius:13px;border:1px solid var(--border)}
+.preview{margin-top:14px}.preview img{max-width:100%;max-height:380px;border-radius:13px;border:1px solid var(--border)}
 .status{padding:14px 16px;border-radius:14px;margin:14px 0;font-size:18px}
 .ok{background:var(--greenbg);color:var(--green)}
 .warn{background:var(--orangebg);color:var(--orange)}
@@ -54,14 +53,19 @@ input[type=file]{display:none}
 .wide{grid-column:1/-1}
 .label{font-weight:700;font-size:17px;color:#344054;margin-bottom:5px}
 .value{font-size:20px;white-space:pre-wrap}
-.action{font-size:26px;font-weight:800}
-.steps{font-size:20px;margin:0;padding-inline-start:28px}
-.steps li{margin:8px 0}
+.action{font-size:29px;font-weight:800}
+.quick-summary{font-size:23px;line-height:1.55}
+.steps{font-size:20px;margin:0;padding-inline-start:28px}.steps li{margin:8px 0}
+.accessibility{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
 details{border:1px solid var(--border);border-radius:14px;padding:13px 15px;margin-top:14px;background:#fafbfc}
 summary{font-size:18px;font-weight:700;cursor:pointer}
 .translation{white-space:pre-wrap;font-size:18px;line-height:1.65;margin-top:13px}
-.small{font-size:15px;color:var(--muted)}
 .privacy{font-size:16px;color:#475467}
+body.large .value{font-size:24px}
+body.large .action{font-size:34px}
+body.large .quick-summary{font-size:28px}
+body.large .steps{font-size:24px}
+body.large .translation{font-size:22px}
 footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
 @media(max-width:720px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.card{padding:18px}.hero{padding:24px 16px}}
 </style>
@@ -87,7 +91,7 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
     <div class="big" id="dropText">Перетащите письмо сюда</div>
     <div class="actions">
       <label class="button primary" for="fileInput" id="chooseLabel">📁 Выбрать письмо</label>
-      <button class="secondary" onclick="showDemo()" id="demoBtn">✨ Показать пример результата</button>
+      <button class="secondary" onclick="showDemo()" id="demoBtn">✨ Показать пример</button>
     </div>
     <input id="fileInput" type="file" accept=".pdf,application/pdf,image/jpeg,image/png,image/webp,image/gif">
     <div id="fileInfo"></div>
@@ -95,7 +99,6 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
     <div id="sendRow" class="actions" style="display:none">
       <button id="sendBtn" class="primary" onclick="sendFile()">🧠 Объяснить письмо</button>
     </div>
-
     <div id="progressbox" class="progressbox">
       <div class="progress"><div id="bar" class="bar"></div></div>
       <div id="ptext" class="ptext">Читаю документ…</div>
@@ -110,40 +113,33 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
 
   <div class="grid">
     <div class="item wide">
-      <div class="label" id="actionLabel">Нужно ли что-то делать?</div>
+      <div class="label" id="actionLabel">Что делать сейчас?</div>
       <div id="actionValue" class="value action">—</div>
     </div>
-    <div class="item">
-      <div class="label" id="senderLabel">Кто прислал</div>
-      <div id="senderValue" class="value">—</div>
-    </div>
-    <div class="item">
-      <div class="label" id="typeLabel">Что это за письмо</div>
-      <div id="typeValue" class="value">—</div>
-    </div>
-    <div class="item">
-      <div class="label" id="deadlineLabel">Срок для вас</div>
-      <div id="deadlineValue" class="value">—</div>
-    </div>
-    <div class="item">
-      <div class="label" id="paymentLabel">Нужно ли платить сейчас</div>
-      <div id="paymentValue" class="value">—</div>
-    </div>
+
     <div class="item wide">
-      <div class="label" id="summaryLabel">Простое объяснение</div>
-      <div id="summaryValue" class="value">—</div>
-    </div>
-    <div class="item wide">
-      <div class="label" id="importantLabel">Что важно не пропустить</div>
-      <div id="importantValue" class="value">—</div>
-    </div>
-    <div class="item wide">
-      <div class="label" id="stepsLabel">Что делать по шагам</div>
-      <ol id="stepsValue" class="steps"></ol>
+      <div class="label" id="quickSummaryLabel">Что изменится?</div>
+      <div id="quickSummaryValue" class="value quick-summary">—</div>
     </div>
   </div>
 
-  <details open>
+  <div class="accessibility">
+    <button class="primary" id="speakBtn" onclick="speakExplanation()">🔊 Прочитать вслух</button>
+    <button class="secondary" id="stopBtn" onclick="stopSpeaking()">⏹ Остановить</button>
+    <button class="secondary" id="largeBtn" onclick="setLarge(true)">A+ Крупнее</button>
+    <button class="secondary" id="normalBtn" onclick="setLarge(false)">A− Обычный размер</button>
+  </div>
+
+  <div class="grid">
+    <div class="item"><div class="label" id="senderLabel">Кто прислал</div><div id="senderValue" class="value">—</div></div>
+    <div class="item"><div class="label" id="typeLabel">Что это за письмо</div><div id="typeValue" class="value">—</div></div>
+    <div class="item"><div class="label" id="deadlineLabel">Срок для вас</div><div id="deadlineValue" class="value">—</div></div>
+    <div class="item"><div class="label" id="paymentLabel">Нужно ли платить сейчас</div><div id="paymentValue" class="value">—</div></div>
+    <div class="item wide"><div class="label" id="importantLabel">Что важно не пропустить</div><div id="importantValue" class="value">—</div></div>
+    <div class="item wide"><div class="label" id="stepsLabel">Что делать по шагам</div><ol id="stepsValue" class="steps"></ol></div>
+  </div>
+
+  <details>
     <summary id="translationTitle">Полный перевод письма</summary>
     <div id="translationValue" class="translation"></div>
   </details>
@@ -156,9 +152,7 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
 
 <section class="card">
   <h2 id="privacyTitle" style="margin-top:0">О конфиденциальности</h2>
-  <div class="privacy" id="privacyText">
-    Документ отправляется на сервер приложения и в AI-сервис для анализа. Само приложение не сохраняет письмо после завершения запроса. Не загружайте документ, если вы не согласны передавать его AI-сервису.
-  </div>
+  <div class="privacy" id="privacyText">Документ отправляется на сервер приложения и в AI-сервис для анализа. Само приложение не сохраняет письмо после завершения запроса.</div>
 </section>
 
 <footer id="footer">Это помощник для объяснения писем, а не замена врачу, адвокату или финансовому консультанту.</footer>
@@ -167,225 +161,146 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
 <script>
 const T={
 ru:{
- brand:"Понятное письмо",
- subtitle:"Прочитает письмо, переведёт и скажет простыми словами, что делать",
- heroTitle:"Получили непонятное письмо?",
- heroText:"Загрузите PDF или фотографию. Не нужно копировать текст вручную.",
- dropText:"Перетащите письмо сюда",
- choose:"📁 Выбрать письмо",
- demo:"✨ Показать пример результата",
- send:"🧠 Объяснить письмо",
- selected:"Выбран файл",
- reading:"Читаю документ и готовлю объяснение…",
- main:"Главное",
- action:"Нужно ли что-то делать?",
- sender:"Кто прислал",
- type:"Что это за письмо",
- deadline:"Срок для вас",
- payment:"Нужно ли платить сейчас",
- summary:"Простое объяснение",
- important:"Что важно не пропустить",
- steps:"Что делать по шагам",
- translation:"Полный перевод письма",
- uncertainty:"Где программа не уверена",
- privacyTitle:"О конфиденциальности",
- privacy:"Документ отправляется на сервер приложения и в AI-сервис для анализа. Само приложение не сохраняет письмо после завершения запроса. Не загружайте документ, если вы не согласны передавать его AI-сервису.",
+ brand:"Понятное письмо",subtitle:"Прочитает письмо, переведёт и скажет простыми словами, что делать",
+ heroTitle:"Получили непонятное письмо?",heroText:"Загрузите PDF или фотографию. Не нужно копировать текст вручную.",
+ dropText:"Перетащите письмо сюда",choose:"📁 Выбрать письмо",demo:"✨ Показать пример",send:"🧠 Объяснить письмо",
+ selected:"Выбран файл",reading:"Читаю документ и готовлю объяснение…",main:"Главное",
+ action:"Что делать сейчас?",quickSummary:"Что изменится?",sender:"Кто прислал",type:"Что это за письмо",
+ deadline:"Срок для вас",payment:"Нужно ли платить сейчас",important:"Что важно не пропустить",steps:"Что делать по шагам",
+ translation:"Полный перевод письма",uncertainty:"Где программа не уверена",
+ speak:"🔊 Прочитать вслух",stop:"⏹ Остановить",large:"A+ Крупнее",normal:"A− Обычный размер",
+ privacyTitle:"О конфиденциальности",privacy:"Документ отправляется на сервер приложения и в AI-сервис для анализа. Само приложение не сохраняет письмо после завершения запроса.",
  footer:"Это помощник для объяснения писем, а не замена врачу, адвокату или финансовому консультанту.",
- yes:"ДА — нужно сделать",
- no:"НЕТ — сейчас ничего делать не нужно",
- unclear:"НЕЯСНО — лучше проверить",
- confidenceHigh:"Уверенность высокая",
- confidenceMedium:"Уверенность средняя",
- confidenceLow:"Уверенность низкая",
- error:"Не удалось обработать письмо.",
- server:"Сервер пока не настроен или недоступен."
+ yes:"НУЖНО СДЕЛАТЬ",no:"Ничего делать не нужно",unclear:"Неясно — лучше проверить",
+ confidenceHigh:"Уверенность высокая",confidenceMedium:"Уверенность средняя",confidenceLow:"Уверенность низкая",
+ error:"Не удалось обработать письмо.",speechUnsupported:"На этом устройстве чтение вслух не поддерживается."
 },
 he:{
- brand:"מכתב ברור",
- subtitle:"קורא את המכתב, מתרגם ומסביר בפשטות מה צריך לעשות",
- heroTitle:"קיבלתם מכתב לא ברור?",
- heroText:"העלו PDF או צילום. אין צורך להעתיק את הטקסט ידנית.",
- dropText:"גררו את המכתב לכאן",
- choose:"📁 בחירת מכתב",
- demo:"✨ הצגת דוגמה",
- send:"🧠 הסבר את המכתב",
- selected:"נבחר קובץ",
- reading:"קורא את המסמך ומכין הסבר…",
- main:"העיקר",
- action:"האם צריך לעשות משהו?",
- sender:"מי שלח",
- type:"איזה סוג מכתב זה",
- deadline:"המועד עבורכם",
- payment:"האם צריך לשלם עכשיו",
- summary:"הסבר פשוט",
- important:"מה חשוב לא לפספס",
- steps:"מה לעשות שלב אחר שלב",
- translation:"תרגום מלא של המכתב",
- uncertainty:"איפה המערכת לא בטוחה",
- privacyTitle:"פרטיות",
- privacy:"המסמך נשלח לשרת האפליקציה ולשירות AI לצורך הניתוח. האפליקציה עצמה אינה שומרת את המכתב לאחר השלמת הבקשה. אל תעלו מסמך אם אינכם מסכימים להעבירו לשירות AI.",
+ brand:"מכתב ברור",subtitle:"קורא, מתרגם ומסביר בפשטות מה צריך לעשות",
+ heroTitle:"קיבלתם מכתב לא ברור?",heroText:"העלו PDF או צילום. אין צורך להעתיק טקסט ידנית.",
+ dropText:"גררו את המכתב לכאן",choose:"📁 בחירת מכתב",demo:"✨ הצגת דוגמה",send:"🧠 הסבר את המכתב",
+ selected:"נבחר קובץ",reading:"קורא את המסמך ומכין הסבר…",main:"העיקר",
+ action:"מה לעשות עכשיו?",quickSummary:"מה משתנה?",sender:"מי שלח",type:"איזה סוג מכתב זה",
+ deadline:"המועד עבורכם",payment:"האם צריך לשלם עכשיו",important:"מה חשוב לא לפספס",steps:"מה לעשות שלב אחר שלב",
+ translation:"תרגום מלא",uncertainty:"איפה המערכת לא בטוחה",
+ speak:"🔊 הקראה בקול",stop:"⏹ עצור",large:"A+ טקסט גדול",normal:"A− גודל רגיל",
+ privacyTitle:"פרטיות",privacy:"המסמך נשלח לשרת האפליקציה ולשירות AI לצורך הניתוח. האפליקציה עצמה אינה שומרת אותו לאחר השלמת הבקשה.",
  footer:"המערכת מסבירה מכתבים ואינה מחליפה רופא, עורך דין או יועץ פיננסי.",
- yes:"כן — צריך לבצע פעולה",
- no:"לא — כרגע אין צורך לעשות דבר",
- unclear:"לא ברור — מומלץ לבדוק",
- confidenceHigh:"רמת ביטחון גבוהה",
- confidenceMedium:"רמת ביטחון בינונית",
- confidenceLow:"רמת ביטחון נמוכה",
- error:"לא ניתן היה לעבד את המכתב.",
- server:"השרת עדיין לא מוגדר או אינו זמין."
+ yes:"צריך לבצע פעולה",no:"אין צורך לעשות דבר עכשיו",unclear:"לא ברור — מומלץ לבדוק",
+ confidenceHigh:"רמת ביטחון גבוהה",confidenceMedium:"רמת ביטחון בינונית",confidenceLow:"רמת ביטחון נמוכה",
+ error:"לא ניתן היה לעבד את המכתב.",speechUnsupported:"המכשיר הזה אינו תומך בהקראה בקול."
 }};
 
-let lang="ru";
-let currentFile=null;
+let lang="ru", currentFile=null, lastResult=null;
 const $=id=>document.getElementById(id);
 
 function setLang(l){
- lang=l;
- document.body.dir=l==="he"?"rtl":"ltr";
- $("ruBtn").classList.toggle("active",l==="ru");
- $("heBtn").classList.toggle("active",l==="he");
- const x=T[l];
- const map={
-  brand:x.brand,subtitle:x.subtitle,heroTitle:x.heroTitle,heroText:x.heroText,
-  dropText:x.dropText,chooseLabel:x.choose,demoBtn:x.demo,sendBtn:x.send,
-  mainTitle:x.main,actionLabel:x.action,senderLabel:x.sender,typeLabel:x.type,
-  deadlineLabel:x.deadline,paymentLabel:x.payment,summaryLabel:x.summary,
-  importantLabel:x.important,stepsLabel:x.steps,translationTitle:x.translation,
-  uncertaintyTitle:x.uncertainty,privacyTitle:x.privacyTitle,privacyText:x.privacy,
-  footer:x.footer
+ lang=l; document.body.dir=l==="he"?"rtl":"ltr";
+ $("ruBtn").classList.toggle("active",l==="ru"); $("heBtn").classList.toggle("active",l==="he");
+ const x=T[l], map={
+  brand:x.brand,subtitle:x.subtitle,heroTitle:x.heroTitle,heroText:x.heroText,dropText:x.dropText,
+  chooseLabel:x.choose,demoBtn:x.demo,sendBtn:x.send,mainTitle:x.main,actionLabel:x.action,
+  quickSummaryLabel:x.quickSummary,senderLabel:x.sender,typeLabel:x.type,deadlineLabel:x.deadline,
+  paymentLabel:x.payment,importantLabel:x.important,stepsLabel:x.steps,translationTitle:x.translation,
+  uncertaintyTitle:x.uncertainty,speakBtn:x.speak,stopBtn:x.stop,largeBtn:x.large,normalBtn:x.normal,
+  privacyTitle:x.privacyTitle,privacyText:x.privacy,footer:x.footer
  };
  for(const [id,v] of Object.entries(map)) $(id).textContent=v;
 }
 window.setLang=setLang;
 
-const input=$("fileInput");
-const drop=$("drop");
-
+const input=$("fileInput"), drop=$("drop");
 input.addEventListener("change",()=>selectFile(input.files[0]));
 drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("drag")});
 drop.addEventListener("dragleave",()=>drop.classList.remove("drag"));
-drop.addEventListener("drop",e=>{
- e.preventDefault();drop.classList.remove("drag");
- if(e.dataTransfer.files[0]) selectFile(e.dataTransfer.files[0]);
-});
+drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("drag");if(e.dataTransfer.files[0])selectFile(e.dataTransfer.files[0])});
 
 function selectFile(file){
- if(!file)return;
- currentFile=file;
+ if(!file)return; currentFile=file;
  $("fileInfo").innerHTML=`<div class="filechip">✅ ${escapeHtml(T[lang].selected)}: ${escapeHtml(file.name)}</div>`;
- $("sendRow").style.display="flex";
- $("errorBox").innerHTML="";
- $("resultCard").style.display="none";
- $("preview").innerHTML="";
- if(file.type.startsWith("image/")){
-  $("preview").innerHTML=`<img src="${URL.createObjectURL(file)}" alt="">`;
- }
+ $("sendRow").style.display="flex"; $("errorBox").innerHTML=""; $("resultCard").style.display="none"; $("preview").innerHTML="";
+ if(file.type.startsWith("image/")) $("preview").innerHTML=`<img src="${URL.createObjectURL(file)}" alt="">`;
 }
-window.selectFile=selectFile;
 
 function setBusy(on){
- $("sendBtn").disabled=on;
- $("progressbox").style.display=on?"block":"none";
+ $("sendBtn").disabled=on; $("progressbox").style.display=on?"block":"none";
  if(on){
-  $("bar").style.width="18%";
-  $("ptext").textContent=T[lang].reading;
-  let widths=[28,39,51,63,72,81,88];
-  let i=0;
-  window._progressTimer=setInterval(()=>{
-    if(i<widths.length) $("bar").style.width=widths[i++]+"%";
-  },900);
- }else{
-  clearInterval(window._progressTimer);
-  $("bar").style.width="100%";
- }
+  $("bar").style.width="18%"; $("ptext").textContent=T[lang].reading;
+  let widths=[28,39,51,63,72,81,88],i=0;
+  window._timer=setInterval(()=>{if(i<widths.length)$("bar").style.width=widths[i++]+"%"},900);
+ }else{clearInterval(window._timer);$("bar").style.width="100%"}
 }
 
 async function sendFile(){
- if(!currentFile)return;
- setBusy(true);
- $("errorBox").innerHTML="";
+ if(!currentFile)return; setBusy(true); $("errorBox").innerHTML="";
  try{
-  const fd=new FormData();
-  fd.append("file",currentFile);
-  fd.append("language",lang);
-
+  const fd=new FormData(); fd.append("file",currentFile); fd.append("language",lang);
   const res=await fetch("/api/analyze",{method:"POST",body:fd});
-  const payload=await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(payload.detail||T[lang].error);
-
-  render(payload);
- }catch(e){
-  $("errorBox").innerHTML=`<div class="status bad">${escapeHtml(e.message||T[lang].server)}</div>`;
- }finally{
-  setBusy(false);
- }
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.detail||T[lang].error);
+  render(data);
+ }catch(e){$("errorBox").innerHTML=`<div class="status bad">${escapeHtml(e.message||T[lang].error)}</div>`}
+ finally{setBusy(false)}
 }
-window.sendFile=sendFile;
 
 function render(d){
- $("resultCard").style.display="block";
-
- let a=T[lang].unclear, color="var(--orange)";
+ lastResult=d; $("resultCard").style.display="block";
+ let a=T[lang].unclear,color="var(--orange)";
  if(d.action_required==="yes"){a=T[lang].yes;color="var(--red)"}
  if(d.action_required==="no"){a=T[lang].no;color="var(--green)"}
- $("actionValue").textContent=a+(d.action_text?`\n${d.action_text}`:"");
- $("actionValue").style.color=color;
-
- $("senderValue").textContent=d.sender||"—";
- $("typeValue").textContent=d.document_type||"—";
- $("deadlineValue").textContent=d.deadline||"—";
- $("paymentValue").textContent=d.payment_now||"—";
- $("summaryValue").textContent=d.summary||"—";
- $("importantValue").textContent=d.important||"—";
+ $("actionValue").textContent=a+(d.action_text?`\n${d.action_text}`:""); $("actionValue").style.color=color;
+ $("quickSummaryValue").textContent=d.summary||"—"; $("senderValue").textContent=d.sender||"—";
+ $("typeValue").textContent=d.document_type||"—"; $("deadlineValue").textContent=d.deadline||"—";
+ $("paymentValue").textContent=d.payment_now||"—"; $("importantValue").textContent=d.important||"—";
  $("stepsValue").innerHTML=(d.steps||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("");
- $("translationValue").textContent=d.full_translation||"—";
- $("uncertaintyValue").textContent=d.uncertainties||"—";
-
- let label=T[lang].confidenceLow, cls="bad";
+ $("translationValue").textContent=d.full_translation||"—"; $("uncertaintyValue").textContent=d.uncertainties||"—";
+ let label=T[lang].confidenceLow,cls="bad";
  if(d.confidence==="high"){label=T[lang].confidenceHigh;cls="ok"}
  if(d.confidence==="medium"){label=T[lang].confidenceMedium;cls="warn"}
  $("confidence").innerHTML=`<div class="status ${cls}">${escapeHtml(label)}</div>`;
-
  $("uncertaintyDetails").open=d.confidence!=="high";
  $("resultCard").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
-function showDemo(){
- const demoRu={
-  sender:"Маккаби — שירותי בריאות",
-  document_type:"Информационное письмо об изменениях дополнительного страхования",
-  action_required:"no",
-  action_text:"Письмо не требует ответа, отправки документов или немедленной оплаты.",
-  deadline:"Личного срока для ответа нет. 31.08.2026 — дата вступления изменений в силу.",
-  payment_now:"Нет. Сообщается об изменении будущих взносов и доплат.",
-  summary:"Маккаби сообщает об изменениях в дополнительном медицинском страховании: правилах покрытия лекарств, доплатах за отдельные препараты и ежемесячных взносах.",
-  important:"Если вы принимаете препараты, перечисленные в письме, стоит проверить новую доплату.",
-  steps:["Сохранить письмо.","Проверить изменения, если указанные лекарства относятся к вам.","При необходимости уточнить детали в Маккаби."],
-  full_translation:"Демонстрационный пример: здесь в рабочей версии будет полный перевод реального загруженного письма.",
-  uncertainties:"В демонстрационном примере неопределённостей нет.",
-  confidence:"high"
- };
- const demoHe={
-  sender:"מכבי שירותי בריאות",
-  document_type:"מכתב מידע על שינויים בביטוח המשלים",
-  action_required:"no",
-  action_text:"אין צורך להשיב, לשלוח מסמכים או לשלם מיד.",
-  deadline:"אין מועד אישי לתשובה. 31.08.2026 הוא מועד כניסת השינויים לתוקף.",
-  payment_now:"לא. מדובר בעדכון תשלומים עתידיים.",
-  summary:"מכבי מודיעה על שינויים בכיסוי תרופות, בהשתתפות העצמית ובדמי החבר.",
-  important:"אם אחת התרופות המוזכרות רלוונטית לכם, כדאי לבדוק את ההשתתפות העצמית החדשה.",
-  steps:["לשמור את המכתב.","לבדוק שינויים שרלוונטיים לכם.","לפנות למכבי אם יש צורך בהבהרה."],
-  full_translation:"דוגמה בלבד: בגרסה הפעילה יופיע כאן תרגום מלא של המכתב שהועלה.",
-  uncertainties:"אין אי-ודאות בדוגמה.",
-  confidence:"high"
- };
- render(lang==="ru"?demoRu:demoHe);
+function setLarge(on){document.body.classList.toggle("large",!!on)}
+function stopSpeaking(){if("speechSynthesis" in window)window.speechSynthesis.cancel()}
+function speakExplanation(){
+ if(!("speechSynthesis" in window)||!lastResult){alert(T[lang].speechUnsupported);return}
+ stopSpeaking(); const d=lastResult;
+ let act=T[lang].unclear;if(d.action_required==="yes")act=T[lang].yes;if(d.action_required==="no")act=T[lang].no;
+ const parts=lang==="ru"?
+ ["Главное.",act,d.action_text||"","Что изменится.",d.summary||"","Срок для вас.",d.deadline||"",
+  "Нужно ли платить сейчас.",d.payment_now||"","Что важно не пропустить.",d.important||"",
+  "Что делать по шагам.",...(d.steps||[])]:
+ ["העיקר.",act,d.action_text||"","מה משתנה.",d.summary||"","המועד עבורכם.",d.deadline||"",
+  "האם צריך לשלם עכשיו.",d.payment_now||"","מה חשוב לא לפספס.",d.important||"",
+  "מה לעשות שלב אחר שלב.",...(d.steps||[])];
+ const u=new SpeechSynthesisUtterance(parts.filter(Boolean).join(" "));
+ u.lang=lang==="ru"?"ru-RU":"he-IL";u.rate=.9;
+ const voices=speechSynthesis.getVoices(),v=voices.find(x=>x.lang&&x.lang.toLowerCase().startsWith(lang==="ru"?"ru":"he"));
+ if(v)u.voice=v;speechSynthesis.speak(u);
 }
-window.showDemo=showDemo;
 
-function escapeHtml(s){
- return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function showDemo(){
+ render(lang==="ru"?{
+  sender:"Маккаби",document_type:"Информационное письмо",action_required:"no",
+  action_text:"Отвечать, отправлять документы или платить сейчас не нужно.",
+  deadline:"Личного срока для ответа нет. 31.08.2026 — дата вступления изменений в силу.",
+  payment_now:"Нет. Сообщается о будущих изменениях взносов и доплат.",
+  summary:"С 31.08.2026 изменятся некоторые правила покрытия лекарств, доплаты и взносы.",
+  important:"Если вы принимаете WEGOVY, FERINJECT или TRULICITY, проверьте новую доплату.",
+  steps:["Сохранить письмо.","Проверить изменения, которые относятся к вам.","Если что-то непонятно — уточнить в Маккаби."],
+  full_translation:"Демонстрационный пример полного перевода.",uncertainties:"Нет.",confidence:"high"
+ }:{
+  sender:"מכבי",document_type:"מכתב מידע",action_required:"no",action_text:"אין צורך להשיב, לשלוח מסמכים או לשלם עכשיו.",
+  deadline:"אין מועד אישי לתשובה.",payment_now:"לא.",summary:"מ-31.08.2026 ישתנו כמה כללים, השתתפויות ותשלומים.",
+  important:"אם אחת התרופות המוזכרות רלוונטית לכם, בדקו את ההשתתפות החדשה.",
+  steps:["לשמור את המכתב.","לבדוק מה רלוונטי לכם.","לפנות למכבי אם יש שאלה."],
+  full_translation:"דוגמה לתרגום מלא.",uncertainties:"אין.",confidence:"high"
+ });
 }
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 setLang("ru");
 </script>
 </body>
