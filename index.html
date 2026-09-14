@@ -14,9 +14,10 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text);line-height:1.5}
 .wrap{max-width:1000px;margin:auto;padding:20px}
-header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
 h1{margin:0;font-size:clamp(30px,4vw,44px)}
 .subtitle{font-size:18px;color:var(--muted);margin-top:5px}
+.top-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .lang{display:flex;padding:5px;border:1px solid var(--border);background:white;border-radius:14px}
 .lang button{border:0;background:transparent;border-radius:10px;padding:10px 16px;font-size:17px;cursor:pointer}
 .lang button.active{background:var(--blue);color:#fff}
@@ -24,10 +25,15 @@ h1{margin:0;font-size:clamp(30px,4vw,44px)}
 .hero{text-align:center;padding:32px 24px}
 .hero h2{margin:0 0 8px;font-size:30px}
 .hero p{margin:0 auto 22px;font-size:20px;color:var(--muted);max-width:760px}
-.drop{border:3px dashed #9eb6e8;border-radius:18px;padding:30px 18px;background:#fbfdff}
-.drop.drag{background:#eef4ff;border-color:var(--blue)}
-.icon{font-size:50px}
-.big{font-size:21px;font-weight:700;margin:7px 0 14px}
+.choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.choice{
+  border:2px solid var(--border);border-radius:18px;background:#fff;padding:22px 14px;cursor:pointer;
+  min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px
+}
+.choice:hover{border-color:#9eb6e8;background:#fbfdff}
+.choice .emoji{font-size:42px}
+.choice .title{font-size:21px;font-weight:800}
+.choice .desc{font-size:15px;color:var(--muted)}
 button,.button{
   min-height:52px;border-radius:14px;border:1px solid var(--border);
   background:#fff;color:var(--text);padding:12px 19px;font-size:18px;font-weight:700;
@@ -38,12 +44,17 @@ button,.button{
 button:disabled{opacity:.6;cursor:not-allowed}
 input[type=file]{display:none}
 .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}
-.filechip{display:inline-block;background:#f2f4f7;border-radius:12px;padding:10px 14px;margin-top:14px;font-size:17px}
-.preview{margin-top:14px}.preview img{max-width:100%;max-height:380px;border-radius:13px;border:1px solid var(--border)}
 .status{padding:14px 16px;border-radius:14px;margin:14px 0;font-size:18px}
 .ok{background:var(--greenbg);color:var(--green)}
 .warn{background:var(--orangebg);color:var(--orange)}
 .bad{background:var(--redbg);color:var(--red)}
+.pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:18px}
+.page-card{border:1px solid var(--border);border-radius:14px;padding:10px;background:#fafbfc;text-align:left}
+.page-card img{width:100%;height:180px;object-fit:contain;background:#fff;border-radius:10px;border:1px solid var(--border)}
+.page-card .name{font-size:14px;margin-top:7px;word-break:break-word}
+.quality{font-size:14px;font-weight:700;margin-top:5px}
+.quality.good{color:var(--green)} .quality.warnq{color:var(--orange)} .quality.badq{color:var(--red)}
+.remove{margin-top:8px;min-height:38px;padding:7px 10px;font-size:14px}
 .progressbox{display:none;margin-top:17px}
 .progress{height:18px;background:#e5e7eb;border-radius:999px;overflow:hidden}
 .bar{height:100%;width:12%;background:var(--blue);border-radius:999px;transition:width .35s}
@@ -61,13 +72,24 @@ details{border:1px solid var(--border);border-radius:14px;padding:13px 15px;marg
 summary{font-size:18px;font-weight:700;cursor:pointer}
 .translation{white-space:pre-wrap;font-size:18px;line-height:1.65;margin-top:13px}
 .privacy{font-size:16px;color:#475467}
+body.large h1{font-size:50px}
+body.large .subtitle{font-size:22px}
+body.large .hero h2{font-size:36px}
+body.large .hero p{font-size:24px}
+body.large .choice .title{font-size:25px}
+body.large .choice .desc{font-size:19px}
+body.large button,body.large .button{font-size:22px}
 body.large .value{font-size:24px}
 body.large .action{font-size:34px}
 body.large .quick-summary{font-size:28px}
 body.large .steps{font-size:24px}
 body.large .translation{font-size:22px}
 footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
-@media(max-width:720px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.card{padding:18px}.hero{padding:24px 16px}}
+@media(max-width:760px){
+  .choice-grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}.wide{grid-column:auto}.card{padding:18px}.hero{padding:24px 16px}
+  header{align-items:stretch}.top-controls{justify-content:space-between}
+}
 </style>
 </head>
 <body dir="ltr">
@@ -75,30 +97,56 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
 <header>
   <div>
     <h1 id="brand">Понятное письмо</h1>
-    <div class="subtitle" id="subtitle">Прочитает письмо, переведёт и скажет простыми словами, что делать</div>
+    <div class="subtitle" id="subtitle">Покажите письмо — мы объясним простыми словами</div>
   </div>
-  <div class="lang">
-    <button id="ruBtn" class="active" onclick="setLang('ru')">Русский</button>
-    <button id="heBtn" onclick="setLang('he')">עברית</button>
+
+  <div class="top-controls">
+    <button class="secondary" id="largeTopBtn" onclick="toggleLarge()">A+ Крупнее</button>
+    <div class="lang">
+      <button id="ruBtn" class="active" onclick="setLang('ru')">Русский</button>
+      <button id="heBtn" onclick="setLang('he')">עברית</button>
+    </div>
   </div>
 </header>
 
 <section class="card hero">
   <h2 id="heroTitle">Получили непонятное письмо?</h2>
-  <p id="heroText">Загрузите PDF или фотографию. Не нужно копировать текст вручную.</p>
-  <div id="drop" class="drop">
-    <div class="icon">📄</div>
-    <div class="big" id="dropText">Перетащите письмо сюда</div>
+  <p id="heroText">Выберите самый удобный способ. Сканер не нужен.</p>
+
+  <div class="choice-grid">
+    <button class="choice" onclick="openCamera()">
+      <div class="emoji">📷</div>
+      <div class="title" id="cameraTitle">Сфотографировать письмо</div>
+      <div class="desc" id="cameraDesc">Лучший вариант для бумажного письма</div>
+    </button>
+
+    <button class="choice" onclick="openGallery()">
+      <div class="emoji">🖼</div>
+      <div class="title" id="galleryTitle">У меня уже есть фото</div>
+      <div class="desc" id="galleryDesc">Можно выбрать несколько страниц сразу</div>
+    </button>
+
+    <button class="choice" onclick="openPdf()">
+      <div class="emoji">📄</div>
+      <div class="title" id="pdfTitle">У меня письмо в PDF</div>
+      <div class="desc" id="pdfDesc">Например, из электронной почты или сканера</div>
+    </button>
+  </div>
+
+  <input id="cameraInput" type="file" accept="image/*" capture="environment">
+  <input id="galleryInput" type="file" accept="image/*" multiple>
+  <input id="pdfInput" type="file" accept=".pdf,application/pdf">
+
+  <div id="selectionArea" style="display:none">
+    <div id="selectionMessage" class="status ok"></div>
+    <div id="pages" class="pages"></div>
+
     <div class="actions">
-      <label class="button primary" for="fileInput" id="chooseLabel">📁 Выбрать письмо</label>
-      <button class="secondary" onclick="showDemo()" id="demoBtn">✨ Показать пример</button>
+      <button id="anotherPhotoBtn" class="secondary" onclick="openCamera()">➕ Ещё страница</button>
+      <button id="clearBtn" class="secondary" onclick="clearSelection()">Очистить</button>
+      <button id="sendBtn" class="primary" onclick="sendFiles()">✅ Готово — объяснить</button>
     </div>
-    <input id="fileInput" type="file" accept=".pdf,application/pdf,image/jpeg,image/png,image/webp,image/gif">
-    <div id="fileInfo"></div>
-    <div id="preview" class="preview"></div>
-    <div id="sendRow" class="actions" style="display:none">
-      <button id="sendBtn" class="primary" onclick="sendFile()">🧠 Объяснить письмо</button>
-    </div>
+
     <div id="progressbox" class="progressbox">
       <div class="progress"><div id="bar" class="bar"></div></div>
       <div id="ptext" class="ptext">Читаю документ…</div>
@@ -126,8 +174,8 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
   <div class="accessibility">
     <button class="primary" id="speakBtn" onclick="speakExplanation()">🔊 Прочитать вслух</button>
     <button class="secondary" id="stopBtn" onclick="stopSpeaking()">⏹ Остановить</button>
-    <button class="secondary" id="largeBtn" onclick="setLarge(true)">A+ Крупнее</button>
-    <button class="secondary" id="normalBtn" onclick="setLarge(false)">A− Обычный размер</button>
+    <button class="secondary" id="largeResultBtn" onclick="setLarge(true)">A+ Крупнее</button>
+    <button class="secondary" id="normalResultBtn" onclick="setLarge(false)">A− Обычный размер</button>
   </div>
 
   <div class="grid">
@@ -152,7 +200,9 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
 
 <section class="card">
   <h2 id="privacyTitle" style="margin-top:0">О конфиденциальности</h2>
-  <div class="privacy" id="privacyText">Документ отправляется на сервер приложения и в AI-сервис для анализа. Само приложение не сохраняет письмо после завершения запроса.</div>
+  <div class="privacy" id="privacyText">
+    Документ отправляется на сервер приложения и в AI-сервис для анализа. Само приложение не сохраняет письмо после завершения запроса.
+  </div>
 </section>
 
 <footer id="footer">Это помощник для объяснения писем, а не замена врачу, адвокату или финансовому консультанту.</footer>
@@ -161,11 +211,17 @@ footer{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 26px}
 <script>
 const T={
 ru:{
- brand:"Понятное письмо",subtitle:"Прочитает письмо, переведёт и скажет простыми словами, что делать",
- heroTitle:"Получили непонятное письмо?",heroText:"Загрузите PDF или фотографию. Не нужно копировать текст вручную.",
- dropText:"Перетащите письмо сюда",choose:"📁 Выбрать письмо",demo:"✨ Показать пример",send:"🧠 Объяснить письмо",
- selected:"Выбран файл",reading:"Читаю документ и готовлю объяснение…",main:"Главное",
- action:"Что делать сейчас?",quickSummary:"Что изменится?",sender:"Кто прислал",type:"Что это за письмо",
+ brand:"Понятное письмо",subtitle:"Покажите письмо — мы объясним простыми словами",
+ heroTitle:"Получили непонятное письмо?",heroText:"Выберите самый удобный способ. Сканер не нужен.",
+ cameraTitle:"Сфотографировать письмо",cameraDesc:"Лучший вариант для бумажного письма",
+ galleryTitle:"У меня уже есть фото",galleryDesc:"Можно выбрать несколько страниц сразу",
+ pdfTitle:"У меня письмо в PDF",pdfDesc:"Например, из электронной почты или сканера",
+ selectedOne:"Добавлена 1 страница.",selectedMany:"Добавлено страниц: ",pdfSelected:"PDF выбран.",
+ addPage:"➕ Ещё страница",clear:"Очистить",send:"✅ Готово — объяснить",
+ reading:"Читаю документ и готовлю объяснение…",
+ qualityGood:"Фото хорошее",qualityWarn:"Фото можно использовать, но лучше не двигать телефон",
+ qualityBad:"Фото размыто — лучше переснять",remove:"Удалить",
+ main:"Главное",action:"Что делать сейчас?",quickSummary:"Что изменится?",sender:"Кто прислал",type:"Что это за письмо",
  deadline:"Срок для вас",payment:"Нужно ли платить сейчас",important:"Что важно не пропустить",steps:"Что делать по шагам",
  translation:"Полный перевод письма",uncertainty:"Где программа не уверена",
  speak:"🔊 Прочитать вслух",stop:"⏹ Остановить",large:"A+ Крупнее",normal:"A− Обычный размер",
@@ -176,11 +232,17 @@ ru:{
  error:"Не удалось обработать письмо.",speechUnsupported:"На этом устройстве чтение вслух не поддерживается."
 },
 he:{
- brand:"מכתב ברור",subtitle:"קורא, מתרגם ומסביר בפשטות מה צריך לעשות",
- heroTitle:"קיבלתם מכתב לא ברור?",heroText:"העלו PDF או צילום. אין צורך להעתיק טקסט ידנית.",
- dropText:"גררו את המכתב לכאן",choose:"📁 בחירת מכתב",demo:"✨ הצגת דוגמה",send:"🧠 הסבר את המכתב",
- selected:"נבחר קובץ",reading:"קורא את המסמך ומכין הסבר…",main:"העיקר",
- action:"מה לעשות עכשיו?",quickSummary:"מה משתנה?",sender:"מי שלח",type:"איזה סוג מכתב זה",
+ brand:"מכתב ברור",subtitle:"הראו לנו את המכתב — נסביר בפשטות",
+ heroTitle:"קיבלתם מכתב לא ברור?",heroText:"בחרו בדרך הנוחה ביותר. אין צורך בסורק.",
+ cameraTitle:"לצלם את המכתב",cameraDesc:"האפשרות הטובה ביותר למכתב מנייר",
+ galleryTitle:"כבר יש לי תמונות",galleryDesc:"אפשר לבחור כמה עמודים יחד",
+ pdfTitle:"המכתב שלי בקובץ PDF",pdfDesc:"למשל מדוא״ל או מסריקה",
+ selectedOne:"נוסף עמוד אחד.",selectedMany:"נוספו עמודים: ",pdfSelected:"קובץ PDF נבחר.",
+ addPage:"➕ עוד עמוד",clear:"נקה",send:"✅ סיימתי — הסבר",
+ reading:"קורא את המסמך ומכין הסבר…",
+ qualityGood:"התמונה טובה",qualityWarn:"אפשר להשתמש בתמונה, אבל עדיף לצלם בלי להזיז את הטלפון",
+ qualityBad:"התמונה מטושטשת — עדיף לצלם שוב",remove:"מחק",
+ main:"העיקר",action:"מה לעשות עכשיו?",quickSummary:"מה משתנה?",sender:"מי שלח",type:"איזה סוג מכתב זה",
  deadline:"המועד עבורכם",payment:"האם צריך לשלם עכשיו",important:"מה חשוב לא לפספס",steps:"מה לעשות שלב אחר שלב",
  translation:"תרגום מלא",uncertainty:"איפה המערכת לא בטוחה",
  speak:"🔊 הקראה בקול",stop:"⏹ עצור",large:"A+ טקסט גדול",normal:"A− גודל רגיל",
@@ -191,69 +253,177 @@ he:{
  error:"לא ניתן היה לעבד את המכתב.",speechUnsupported:"המכשיר הזה אינו תומך בהקראה בקול."
 }};
 
-let lang="ru", currentFile=null, lastResult=null;
+let lang="ru", selectedFiles=[], lastResult=null, largeMode=false;
 const $=id=>document.getElementById(id);
 
 function setLang(l){
- lang=l; document.body.dir=l==="he"?"rtl":"ltr";
- $("ruBtn").classList.toggle("active",l==="ru"); $("heBtn").classList.toggle("active",l==="he");
- const x=T[l], map={
-  brand:x.brand,subtitle:x.subtitle,heroTitle:x.heroTitle,heroText:x.heroText,dropText:x.dropText,
-  chooseLabel:x.choose,demoBtn:x.demo,sendBtn:x.send,mainTitle:x.main,actionLabel:x.action,
-  quickSummaryLabel:x.quickSummary,senderLabel:x.sender,typeLabel:x.type,deadlineLabel:x.deadline,
-  paymentLabel:x.payment,importantLabel:x.important,stepsLabel:x.steps,translationTitle:x.translation,
-  uncertaintyTitle:x.uncertainty,speakBtn:x.speak,stopBtn:x.stop,largeBtn:x.large,normalBtn:x.normal,
+ lang=l;document.body.dir=l==="he"?"rtl":"ltr";
+ $("ruBtn").classList.toggle("active",l==="ru");$("heBtn").classList.toggle("active",l==="he");
+ const x=T[l],map={
+  brand:x.brand,subtitle:x.subtitle,heroTitle:x.heroTitle,heroText:x.heroText,
+  cameraTitle:x.cameraTitle,cameraDesc:x.cameraDesc,galleryTitle:x.galleryTitle,galleryDesc:x.galleryDesc,
+  pdfTitle:x.pdfTitle,pdfDesc:x.pdfDesc,anotherPhotoBtn:x.addPage,clearBtn:x.clear,sendBtn:x.send,
+  mainTitle:x.main,actionLabel:x.action,quickSummaryLabel:x.quickSummary,senderLabel:x.sender,typeLabel:x.type,
+  deadlineLabel:x.deadline,paymentLabel:x.payment,importantLabel:x.important,stepsLabel:x.steps,
+  translationTitle:x.translation,uncertaintyTitle:x.uncertainty,speakBtn:x.speak,stopBtn:x.stop,
+  largeTopBtn:largeMode?x.normal:x.large,largeResultBtn:x.large,normalResultBtn:x.normal,
   privacyTitle:x.privacyTitle,privacyText:x.privacy,footer:x.footer
  };
  for(const [id,v] of Object.entries(map)) $(id).textContent=v;
+ renderSelected();
 }
 window.setLang=setLang;
 
-const input=$("fileInput"), drop=$("drop");
-input.addEventListener("change",()=>selectFile(input.files[0]));
-drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("drag")});
-drop.addEventListener("dragleave",()=>drop.classList.remove("drag"));
-drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("drag");if(e.dataTransfer.files[0])selectFile(e.dataTransfer.files[0])});
+function toggleLarge(){setLarge(!largeMode)}
+function setLarge(on){
+ largeMode=!!on;document.body.classList.toggle("large",largeMode);
+ $("largeTopBtn").textContent=largeMode?T[lang].normal:T[lang].large;
+}
+window.toggleLarge=toggleLarge;window.setLarge=setLarge;
 
-function selectFile(file){
- if(!file)return; currentFile=file;
- $("fileInfo").innerHTML=`<div class="filechip">✅ ${escapeHtml(T[lang].selected)}: ${escapeHtml(file.name)}</div>`;
- $("sendRow").style.display="flex"; $("errorBox").innerHTML=""; $("resultCard").style.display="none"; $("preview").innerHTML="";
- if(file.type.startsWith("image/")) $("preview").innerHTML=`<img src="${URL.createObjectURL(file)}" alt="">`;
+function openCamera(){$("cameraInput").click()}
+function openGallery(){$("galleryInput").click()}
+function openPdf(){$("pdfInput").click()}
+window.openCamera=openCamera;window.openGallery=openGallery;window.openPdf=openPdf;
+
+$("cameraInput").addEventListener("change",async e=>{
+ if(e.target.files[0]) await addImages([e.target.files[0]]);
+ e.target.value="";
+});
+$("galleryInput").addEventListener("change",async e=>{
+ if(e.target.files.length) await addImages([...e.target.files]);
+ e.target.value="";
+});
+$("pdfInput").addEventListener("change",e=>{
+ if(e.target.files[0]){
+  selectedFiles=[{file:e.target.files[0],kind:"pdf",quality:null,preview:null}];
+  renderSelected();
+ }
+ e.target.value="";
+});
+
+async function addImages(files){
+ // If photos are chosen, replace a selected PDF; otherwise append pages.
+ if(selectedFiles.some(x=>x.kind==="pdf")) selectedFiles=[];
+ for(const file of files){
+  if(selectedFiles.length>=10) break;
+  const info=await inspectImage(file);
+  selectedFiles.push({file,kind:"image",quality:info.quality,score:info.score,preview:info.preview});
+ }
+ renderSelected();
 }
 
+async function inspectImage(file){
+ const url=URL.createObjectURL(file);
+ const img=new Image();
+ const loaded=new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject});
+ img.src=url; await loaded;
+
+ const max=500,scale=Math.min(1,max/Math.max(img.width,img.height));
+ const c=document.createElement("canvas");
+ c.width=Math.max(80,Math.round(img.width*scale));c.height=Math.max(80,Math.round(img.height*scale));
+ const ctx=c.getContext("2d",{willReadFrequently:true});ctx.drawImage(img,0,0,c.width,c.height);
+ const data=ctx.getImageData(0,0,c.width,c.height).data;
+
+ // Simple sharpness estimate: mean squared difference with neighboring grayscale pixels.
+ let sum=0,count=0;
+ for(let y=0;y<c.height-1;y+=2){
+  for(let x=0;x<c.width-1;x+=2){
+   const i=(y*c.width+x)*4,ir=(y*c.width+x+1)*4,id=((y+1)*c.width+x)*4;
+   const g=.299*data[i]+.587*data[i+1]+.114*data[i+2];
+   const gr=.299*data[ir]+.587*data[ir+1]+.114*data[ir+2];
+   const gd=.299*data[id]+.587*data[id+1]+.114*data[id+2];
+   sum+=(g-gr)*(g-gr)+(g-gd)*(g-gd);count+=2;
+  }
+ }
+ const score=count?sum/count:0;
+ let quality="good";
+ if(score<45) quality="bad"; else if(score<110) quality="warn";
+ return {quality,score,preview:url};
+}
+
+function renderSelected(){
+ const area=$("selectionArea"),pages=$("pages");
+ if(!selectedFiles.length){area.style.display="none";pages.innerHTML="";return}
+ area.style.display="block";
+
+ const x=T[lang];
+ if(selectedFiles.length===1 && selectedFiles[0].kind==="pdf") $("selectionMessage").textContent=x.pdfSelected;
+ else if(selectedFiles.length===1) $("selectionMessage").textContent=x.selectedOne;
+ else $("selectionMessage").textContent=x.selectedMany+selectedFiles.length;
+
+ $("anotherPhotoBtn").style.display=selectedFiles.some(f=>f.kind==="pdf")?"none":"inline-flex";
+
+ pages.innerHTML="";
+ selectedFiles.forEach((item,i)=>{
+  const card=document.createElement("div");card.className="page-card";
+  if(item.kind==="image"){
+   const qtxt=item.quality==="good"?x.qualityGood:item.quality==="warn"?x.qualityWarn:x.qualityBad;
+   const qclass=item.quality==="good"?"good":item.quality==="warn"?"warnq":"badq";
+   card.innerHTML=`<img src="${item.preview}" alt="">
+     <div class="name">${escapeHtml(item.file.name)}</div>
+     <div class="quality ${qclass}">${escapeHtml(qtxt)}</div>
+     <button class="remove" onclick="removePage(${i})">${escapeHtml(x.remove)}</button>`;
+  }else{
+   card.innerHTML=`<div style="font-size:54px;text-align:center;padding:32px 0">📄</div>
+     <div class="name">${escapeHtml(item.file.name)}</div>
+     <button class="remove" onclick="removePage(${i})">${escapeHtml(x.remove)}</button>`;
+  }
+  pages.appendChild(card);
+ });
+}
+
+function removePage(i){
+ const item=selectedFiles[i];
+ if(item?.preview) URL.revokeObjectURL(item.preview);
+ selectedFiles.splice(i,1);renderSelected();
+}
+window.removePage=removePage;
+
+function clearSelection(){
+ selectedFiles.forEach(x=>{if(x.preview)URL.revokeObjectURL(x.preview)});
+ selectedFiles=[];$("resultCard").style.display="none";$("errorBox").innerHTML="";renderSelected();
+}
+window.clearSelection=clearSelection;
+
 function setBusy(on){
- $("sendBtn").disabled=on; $("progressbox").style.display=on?"block":"none";
+ $("sendBtn").disabled=on;$("progressbox").style.display=on?"block":"none";
  if(on){
-  $("bar").style.width="18%"; $("ptext").textContent=T[lang].reading;
+  $("bar").style.width="18%";$("ptext").textContent=T[lang].reading;
   let widths=[28,39,51,63,72,81,88],i=0;
   window._timer=setInterval(()=>{if(i<widths.length)$("bar").style.width=widths[i++]+"%"},900);
  }else{clearInterval(window._timer);$("bar").style.width="100%"}
 }
 
-async function sendFile(){
- if(!currentFile)return; setBusy(true); $("errorBox").innerHTML="";
+async function sendFiles(){
+ if(!selectedFiles.length)return;
+ setBusy(true);$("errorBox").innerHTML="";
  try{
-  const fd=new FormData(); fd.append("file",currentFile); fd.append("language",lang);
+  const fd=new FormData();
+  selectedFiles.forEach(x=>fd.append("files",x.file,x.file.name));
+  fd.append("language",lang);
+
   const res=await fetch("/api/analyze",{method:"POST",body:fd});
   const data=await res.json().catch(()=>({}));
   if(!res.ok) throw new Error(data.detail||T[lang].error);
-  render(data);
- }catch(e){$("errorBox").innerHTML=`<div class="status bad">${escapeHtml(e.message||T[lang].error)}</div>`}
- finally{setBusy(false)}
+  renderResult(data);
+ }catch(e){
+  $("errorBox").innerHTML=`<div class="status bad">${escapeHtml(e.message||T[lang].error)}</div>`;
+ }finally{setBusy(false)}
 }
+window.sendFiles=sendFiles;
 
-function render(d){
- lastResult=d; $("resultCard").style.display="block";
+function renderResult(d){
+ lastResult=d;$("resultCard").style.display="block";
  let a=T[lang].unclear,color="var(--orange)";
  if(d.action_required==="yes"){a=T[lang].yes;color="var(--red)"}
  if(d.action_required==="no"){a=T[lang].no;color="var(--green)"}
- $("actionValue").textContent=a+(d.action_text?`\n${d.action_text}`:""); $("actionValue").style.color=color;
- $("quickSummaryValue").textContent=d.summary||"—"; $("senderValue").textContent=d.sender||"—";
- $("typeValue").textContent=d.document_type||"—"; $("deadlineValue").textContent=d.deadline||"—";
- $("paymentValue").textContent=d.payment_now||"—"; $("importantValue").textContent=d.important||"—";
+ $("actionValue").textContent=a+(d.action_text?`\n${d.action_text}`:"");$("actionValue").style.color=color;
+ $("quickSummaryValue").textContent=d.summary||"—";$("senderValue").textContent=d.sender||"—";
+ $("typeValue").textContent=d.document_type||"—";$("deadlineValue").textContent=d.deadline||"—";
+ $("paymentValue").textContent=d.payment_now||"—";$("importantValue").textContent=d.important||"—";
  $("stepsValue").innerHTML=(d.steps||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("");
- $("translationValue").textContent=d.full_translation||"—"; $("uncertaintyValue").textContent=d.uncertainties||"—";
+ $("translationValue").textContent=d.full_translation||"—";$("uncertaintyValue").textContent=d.uncertainties||"—";
  let label=T[lang].confidenceLow,cls="bad";
  if(d.confidence==="high"){label=T[lang].confidenceHigh;cls="ok"}
  if(d.confidence==="medium"){label=T[lang].confidenceMedium;cls="warn"}
@@ -262,11 +432,10 @@ function render(d){
  $("resultCard").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
-function setLarge(on){document.body.classList.toggle("large",!!on)}
-function stopSpeaking(){if("speechSynthesis" in window)window.speechSynthesis.cancel()}
+function stopSpeaking(){if("speechSynthesis" in window)speechSynthesis.cancel()}
 function speakExplanation(){
  if(!("speechSynthesis" in window)||!lastResult){alert(T[lang].speechUnsupported);return}
- stopSpeaking(); const d=lastResult;
+ stopSpeaking();const d=lastResult;
  let act=T[lang].unclear;if(d.action_required==="yes")act=T[lang].yes;if(d.action_required==="no")act=T[lang].no;
  const parts=lang==="ru"?
  ["Главное.",act,d.action_text||"","Что изменится.",d.summary||"","Срок для вас.",d.deadline||"",
@@ -280,25 +449,7 @@ function speakExplanation(){
  const voices=speechSynthesis.getVoices(),v=voices.find(x=>x.lang&&x.lang.toLowerCase().startsWith(lang==="ru"?"ru":"he"));
  if(v)u.voice=v;speechSynthesis.speak(u);
 }
-
-function showDemo(){
- render(lang==="ru"?{
-  sender:"Маккаби",document_type:"Информационное письмо",action_required:"no",
-  action_text:"Отвечать, отправлять документы или платить сейчас не нужно.",
-  deadline:"Личного срока для ответа нет. 31.08.2026 — дата вступления изменений в силу.",
-  payment_now:"Нет. Сообщается о будущих изменениях взносов и доплат.",
-  summary:"С 31.08.2026 изменятся некоторые правила покрытия лекарств, доплаты и взносы.",
-  important:"Если вы принимаете WEGOVY, FERINJECT или TRULICITY, проверьте новую доплату.",
-  steps:["Сохранить письмо.","Проверить изменения, которые относятся к вам.","Если что-то непонятно — уточнить в Маккаби."],
-  full_translation:"Демонстрационный пример полного перевода.",uncertainties:"Нет.",confidence:"high"
- }:{
-  sender:"מכבי",document_type:"מכתב מידע",action_required:"no",action_text:"אין צורך להשיב, לשלוח מסמכים או לשלם עכשיו.",
-  deadline:"אין מועד אישי לתשובה.",payment_now:"לא.",summary:"מ-31.08.2026 ישתנו כמה כללים, השתתפויות ותשלומים.",
-  important:"אם אחת התרופות המוזכרות רלוונטית לכם, בדקו את ההשתתפות החדשה.",
-  steps:["לשמור את המכתב.","לבדוק מה רלוונטי לכם.","לפנות למכבי אם יש שאלה."],
-  full_translation:"דוגמה לתרגום מלא.",uncertainties:"אין.",confidence:"high"
- });
-}
+window.speakExplanation=speakExplanation;window.stopSpeaking=stopSpeaking;
 
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 setLang("ru");

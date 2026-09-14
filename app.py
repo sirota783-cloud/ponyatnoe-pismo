@@ -23,7 +23,7 @@ ALLOWED_TYPES = ALLOWED_IMAGE_TYPES | {"application/pdf"}
 MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-terra")
 API_KEY = os.getenv("OPENAI_API_KEY")
 
-app = FastAPI(title="Понятное письмо API", version="5.0")
+app = FastAPI(title="Понятное письмо API", version="6.0")
 
 LETTER_SCHEMA = {
     "type": "object",
@@ -92,57 +92,93 @@ def health():
     return {"ok": True, "model": MODEL, "api_key_configured": bool(API_KEY)}
 
 @app.post("/api/analyze")
-async def analyze_letter(file: UploadFile = File(...), language: str = Form("ru")):
+async def analyze_letter(
+    files: list[UploadFile] = File(...),
+    language: str = Form("ru")
+):
     if not API_KEY:
         raise HTTPException(status_code=503, detail="На сервере не настроен OPENAI_API_KEY.")
 
     language = "he" if language == "he" else "ru"
-    content = await file.read()
 
-    if not content:
-        raise HTTPException(status_code=400, detail="Файл пустой.")
-    if len(content) > MAX_FILE_BYTES:
-        raise HTTPException(status_code=413, detail="Файл слишком большой. Максимум 20 МБ.")
+    if not files:
+        raise HTTPException(status_code=400, detail="Не выбран ни один файл.")
+    if len(files) > 10:
+        raise HTTPException(status_code=400, detail="Можно загрузить не более 10 страниц за один раз.")
 
-    mime = file.content_type or mimetypes.guess_type(file.filename or "")[0] or ""
-    if mime not in ALLOWED_TYPES:
-        raise HTTPException(status_code=415, detail="Поддерживаются PDF, JPG, PNG, WEBP и GIF.")
+    prepared = []
+    total_bytes = 0
 
+    for upload in files:
+        content = await upload.read()
+        if not content:
+            continue
+
+        total_bytes += len(content)
+        if total_bytes > 30 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="Общий размер файлов слишком большой. Максимум 30 МБ.")
+
+        mime = upload.content_type or mimetypes.guess_type(upload.filename or "")[0] or ""
+        if mime not in ALLOWED_TYPES:
+            raise HTTPException(
+                status_code=415,
+                detail="Поддерживаются PDF, JPG, PNG, WEBP и GIF."
+            )
+
+        prepared.append({
+            "filename": upload.filename or "document",
+            "mime": mime,
+            "content": content,
+        })
+
+    if not prepared:
+        raise HTTPException(status_code=400, detail="Файлы пустые.")
+
+    # For the simple elderly-user flow:
+    # - one or more photos are treated as consecutive pages of the same letter;
+    # - PDFs are also supported;
+    # - mixed image/PDF batches are accepted, but the model is told to preserve order.
     client = OpenAI(api_key=API_KEY)
-    uploaded_file_id = None
-    temp_path = None
+    uploaded_file_ids = []
+    temp_paths = []
 
     try:
         user_content = [{
             "type": "input_text",
             "text": (
-                "Read this official letter carefully. Explain whether the recipient actually "
-                "has to do anything, whether there is a personal deadline, and whether payment "
-                "is demanded now."
+                "These files are pages of one official letter, in the order supplied. "
+                "Read all pages together. Explain whether the recipient actually has to do "
+                "anything, whether there is a personal deadline, and whether payment is demanded now. "
+                "If a page is blurry or unreadable, say exactly what cannot be read and lower confidence."
             )
         }]
 
-        if mime == "application/pdf":
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(content)
-                temp_path = tmp.name
+        for item in prepared:
+            mime = item["mime"]
+            content = item["content"]
 
-            with open(temp_path, "rb") as f:
-                uploaded = client.files.create(file=f, purpose="user_data")
-            uploaded_file_id = uploaded.id
+            if mime == "application/pdf":
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                    tmp.write(content)
+                    temp_path = tmp.name
+                temp_paths.append(temp_path)
 
-            user_content.append({
-                "type": "input_file",
-                "file_id": uploaded_file_id,
-                "detail": "high"
-            })
-        else:
-            b64 = base64.b64encode(content).decode("ascii")
-            user_content.append({
-                "type": "input_image",
-                "image_url": f"data:{mime};base64,{b64}",
-                "detail": "high"
-            })
+                with open(temp_path, "rb") as f:
+                    uploaded = client.files.create(file=f, purpose="user_data")
+                uploaded_file_ids.append(uploaded.id)
+
+                user_content.append({
+                    "type": "input_file",
+                    "file_id": uploaded.id,
+                    "detail": "high"
+                })
+            else:
+                b64 = base64.b64encode(content).decode("ascii")
+                user_content.append({
+                    "type": "input_image",
+                    "image_url": f"data:{mime};base64,{b64}",
+                    "detail": "high"
+                })
 
         response = client.responses.create(
             model=MODEL,
@@ -160,21 +196,27 @@ async def analyze_letter(file: UploadFile = File(...), language: str = Form("ru"
 
         data = json.loads(response.output_text)
         data["model"] = MODEL
+        data["pages_received"] = len(prepared)
         return data
 
     except HTTPException:
         raise
     except Exception as exc:
         log.exception("Letter analysis failed: %s", exc)
-        raise HTTPException(status_code=502, detail="Не удалось проанализировать письмо. Попробуйте ещё раз.")
+        raise HTTPException(
+            status_code=502,
+            detail="Не удалось проанализировать письмо. Попробуйте ещё раз."
+        )
     finally:
-        if uploaded_file_id:
+        for file_id in uploaded_file_ids:
             try:
-                client.files.delete(uploaded_file_id)
+                client.files.delete(file_id)
             except Exception:
                 pass
-        if temp_path:
+
+        for temp_path in temp_paths:
             try:
                 os.remove(temp_path)
             except OSError:
                 pass
+
